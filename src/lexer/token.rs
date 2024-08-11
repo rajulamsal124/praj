@@ -10,7 +10,7 @@ pub enum Token {
     // Literals
     Identifier(String),         // Variables, function names, etc.
     StringLiteral(String),      // String literals like "hello"
-    Number(f64),               // Numeric literals like 123 or 4.56
+    Number(f64),                // Numeric literals like 123 or 4.56
 
     // Keywords
     And, Class, Else, False, Fun, For, If, Nil, Or,
@@ -18,4 +18,7 @@ pub enum Token {
 
     // End of file
     EOF,
+
+    // Added to capture errors
+    Error(String),              // To capture error messages
 }
