@@ -2,14 +2,39 @@ mod lexer;
 mod parser;
 mod runtime;
 
+use std::{env, fs};
+use std::path::Path;
 use lexer::lexer_core::Lexer;
 use parser::parser_core::Parser;
 use runtime::environment::Environment;
 use runtime::runtime_core::Evaluator;
 
 fn main() {
-    let source = "(3 + 42) * 7.5".to_string();
-    
+    // Collect command-line arguments
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        eprintln!("Usage: {} <path to .pr file>", args[0]);
+        std::process::exit(1);
+    }
+
+    let file_path = &args[1];
+    let path = Path::new(file_path);
+
+    // Check if the file exists and is a .pr file
+    if !path.exists() || path.extension().unwrap_or_default() != "pr" {
+        eprintln!("Invalid file path or file is not a .pr file!");
+        std::process::exit(1);
+    }
+
+    // Read the file content
+    let source = match fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("Failed to read file: {:?}", e);
+            std::process::exit(1);
+        }
+    };
+
     // Lexical analysis
     let mut lexer = Lexer::new(source);
     let tokens = lexer.scan_tokens();
@@ -26,7 +51,7 @@ fn main() {
         Ok(expr) => expr,
         Err(e) => {
             eprintln!("Failed to parse: {:?}", e);
-            return;
+            std::process::exit(1);
         }
     };
 
@@ -41,6 +66,9 @@ fn main() {
     // Evaluation
     match evaluator.evaluate(&ast) {
         Ok(result) => println!("\nResult: {:?}", result),
-        Err(e) => eprintln!("Failed to evaluate: {:?}", e),
+        Err(e) => {
+            eprintln!("Failed to evaluate: {:?}", e);
+            std::process::exit(1);
+        }
     }
 }
